@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+//import 'package:decimal/decimal.dart';//
+//import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 
 void main() => runApp(const MyApp());
 
@@ -36,13 +39,33 @@ class _MyCustomFormState extends State<MyCustomForm> {
   String amountStr = '';
   String passcodeStr = '';
   double amount = 0.00;
+  double balance = 0.00;
   int passcode = 0;
+  String msg = '';
+
+  final usCurrency = NumberFormat("#,##0.00", "en_US");
+
+  // FlutterMoneyFormatter fmf = FlutterMoneyFormatter(amount: balance);
 
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
     myController.dispose();
     super.dispose();
+  }
+
+  void getBalance() async {
+    final response =
+        await http.get(Uri.parse('https://peacioapi.com:3000/ping'));
+    double localBal = 400.01999;
+    print("get balance now xxxxxxxxxxxxxxxxxxxxxxxxS");
+    //  balance = localBal;
+    setState(() {
+      balance = localBal;
+    });
+    print("baklceb is -------");
+    print(balance);
+    // return 1;
   }
 
   Future<http.Response> payUser(String receiver, String amount) {
@@ -59,7 +82,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
     return TextFormField(
       decoration: const InputDecoration(
         //  icon: Icon(Icons.send),
-        hintText: 'Receiver Email',
+        labelText: 'Receiver Email',
         // helperText: 'Helper Text',
         //  counterText: '0 characters',
         border: OutlineInputBorder(),
@@ -92,8 +115,9 @@ class _MyCustomFormState extends State<MyCustomForm> {
   Widget buildAmount() {
     return TextFormField(
       decoration: const InputDecoration(
+        //  contentPadding: EdgeInsets.symmetric(horizontal: 700),
         // icon: Icon(Icons.send),
-        hintText: 'Payment Amount',
+        labelText: 'Payment Amount',
         //  helperText: 'Helper Text',
         //  counterText: '0 characters',
         border: OutlineInputBorder(),
@@ -124,7 +148,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
     return TextFormField(
       decoration: const InputDecoration(
         // icon: Icon(Icons.send),
-        hintText: 'Pass Code',
+        labelText: 'Pass Code',
         //  helperText: 'Helper Text',
         //  counterText: '0 characters',
         border: OutlineInputBorder(),
@@ -157,7 +181,19 @@ class _MyCustomFormState extends State<MyCustomForm> {
     return Scaffold(
         appBar: AppBar(
           title: const Text('Peacio Payments'),
+          actions: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.account_balance),
+              onPressed: (getBalance),
+            ),
+          ],
         ),
+
+        //  appBar: PreferredSize(
+        //      preferredSize: const Size.fromWidth(600),
+        //      child: Column(
+        //        children: [AppBar(title: const Text('Payments'))],
+        //      )),
         body: Container(
             margin: const EdgeInsets.all(24),
             child: Form(
@@ -165,11 +201,56 @@ class _MyCustomFormState extends State<MyCustomForm> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
                 headerLabel(),
-                buildReceiver(),
-                buildAmount(),
-                passCode(),
                 const SizedBox(
-                  height: 50,
+                  height: 10,
+                ),
+                SizedBox(
+                  child:
+                      //Text(NumberFormat.simpleCurrency(locale:))
+                      Text('Balance:  ${usCurrency.format(balance)}',
+                          style: const TextStyle(fontSize: 20)),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                buildReceiver(),
+                const SizedBox(
+                  height: 10,
+                ),
+                Container(
+                  width: 400,
+                  alignment: Alignment.topLeft,
+                  child: SizedBox(
+                    width: 200,
+                    //alignment: const Alignment(-1.0, 0.0),
+                    child: buildAmount(),
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Container(
+                  width: 400,
+                  alignment: Alignment.topLeft,
+                  child: SizedBox(
+                    width: 200,
+                    //alignment: const Alignment(-1.0, 0.0),
+                    child: passCode(),
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                SizedBox(
+                  child:
+                      //Text(NumberFormat.simpleCurrency(locale:))
+                      Text('$msg', style: const TextStyle(fontSize: 20)),
+                ),
+                // ),
+                //buildAmount(),
+                // passCode(),
+                const SizedBox(
+                  height: 10,
                 ),
                 ElevatedButton.icon(
                   onPressed: () async {
@@ -183,11 +264,17 @@ class _MyCustomFormState extends State<MyCustomForm> {
                         .get(Uri.parse('https://peacioapi.com:3000/ping'));
 
                     print(response.body);
-                    var myInt = int.parse('passcodeStr');
-                    if (myInt == 1234) {}
+                    var myInt = int.parse(passcodeStr);
+                    if (myInt == 1234) {
+                      final response2 = await payUser(receiver, amountStr);
+                      print(response2.body);
+                      getBalance();
+                      setState(() => msg = 'Payment made');
+                    } else {
+                      setState(() => msg = 'Passcode wrong');
+                    }
 
 //getDBData
-                    final response2 = await payUser(receiver, amountStr);
                     /* http.post(
                         Uri.parse('https://peacioapi.com:3000/getDBData'),
                         headers: <String, String>{
@@ -196,7 +283,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                         body:
                             jsonEncode(<String, String>{'keyword': receiver}));
                     */
-                    print(response2.body);
+                    // setState(() => msg = 'Payment made');
                   },
                   icon: const Icon(Icons.arrow_right, size: 40),
                   // label: const Text("pay"),
