@@ -42,6 +42,8 @@ class _MyCustomFormState extends State<MyCustomForm> {
   double balance = 0.00;
   int passcode = 0;
   String msg = '';
+  int msgcolor = 0x00000000;
+  int err = 0;
 
   final usCurrency = NumberFormat("#,##0.00", "en_US");
 
@@ -207,7 +209,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 SizedBox(
                   child:
                       //Text(NumberFormat.simpleCurrency(locale:))
-                      Text('Balance:  ${usCurrency.format(balance)}',
+                      Text('Balance:  ${usCurrency.format(balance)} USD',
                           style: const TextStyle(fontSize: 20)),
                 ),
                 const SizedBox(
