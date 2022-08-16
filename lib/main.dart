@@ -70,12 +70,25 @@ class _MyCustomFormState extends State<MyCustomForm> {
     // return 1;
   }
 
+// user_name: null,
+//  balance: null,
+//  currency: null,
+//  date_time: 2022-08-16T07:02:34.955Z,
+//  pass_code: null,
+
   Future<http.Response> payUser(String receiver, String amount) {
-    return http.post(Uri.parse('https://peacioapi.com:3000/getDBData'),
+    return http.post(Uri.parse('https://peacioapi.com:3000/addUser'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(<String, String>{'keyword': receiver}));
+        body: jsonEncode(<String, String>{
+          'email_addr': 'admin@peac.io',
+          'wallet_addr': 'no wallet',
+          'user_name': 'trevor',
+          'balance': '20',
+          'currency': 'usd',
+          'pass_code': '1234'
+        }));
   }
 
   final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
